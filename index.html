@@ -166,16 +166,16 @@ button.row:disabled{cursor:default}
 .face{position:absolute;inset:0;border-radius:var(--r-sm);border:3px solid var(--ink);box-shadow:var(--shadow-1);display:flex;align-items:center;justify-content:center;
  backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .bk{background:var(--blue-500);background-image:radial-gradient(rgba(255,255,255,.28) 2px,transparent 2px);background-size:14px 14px;transition:transform .12s var(--ease-out),box-shadow .12s,background-color .15s}
-.bk b{font-family:var(--disp);font-weight:800;font-size:clamp(.9rem,36cqi,4.2rem);line-height:1}
+.bk b{font-family:var(--disp);font-weight:800;font-size:clamp(.9rem,36cqmin,4.6rem);line-height:1}
 .c:not(.o):not(:disabled):hover .bk{background-color:var(--blue-400)}
 .c:not(.o):not(:disabled):active .bk{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
-.ft{transform:rotateY(180deg);flex-direction:column;gap:4cqi;background:#fff}
-.em{font-size:44cqi;line-height:1}
-.price{font-size:clamp(.5rem,13cqi,1.9rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
+.ft{transform:rotateY(180deg);flex-direction:column;gap:4cqmin;background:#fff}
+.em{font-size:46cqmin;line-height:1}
+.price{font-size:clamp(.5rem,13cqmin,2rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
 .c.m .ft{background:color-mix(in srgb,var(--tc) 30%,#fff)}
 .c.m .price{background:#fff}
-.c.m .tag{position:absolute;top:-8px;inset-inline-end:-8px;width:clamp(18px,24cqi,46px);height:clamp(18px,24cqi,46px);border-radius:30%;background:var(--tc);border:2.5px solid var(--ink);
- display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(.6rem,13cqi,1.5rem);box-shadow:2px 2px 0 var(--ink)}
+.c.m .tag{position:absolute;top:-8px;inset-inline-end:-8px;width:clamp(18px,24cqmin,46px);height:clamp(18px,24cqmin,46px);border-radius:30%;background:var(--tc);border:2.5px solid var(--ink);
+ display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(.6rem,13cqmin,1.5rem);box-shadow:2px 2px 0 var(--ink)}
 .c.m{animation:pop .55s var(--spring);cursor:default}
 .c.no .in{animation:shake .45s ease}
 .c.rd .ft{background:#e0fbff;box-shadow:0 0 0 3px var(--cyan),var(--shadow-1)}
@@ -292,6 +292,9 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
  .side .row{padding:7px 10px;gap:8px}
  .side .tools .btn.lg{height:50px;font-size:16px}
  .stage{justify-self:center;padding:14px}
+ body.playing .stage{width:auto!important;justify-self:stretch;height:calc(100dvh - 32px);display:flex}
+ body.playing .grid{flex:1;width:100%;height:100%}
+ body.playing .c{aspect-ratio:auto;container-type:size}
 }
 @media (max-width:560px){.panel{padding:18px}.opts.six{grid-template-columns:repeat(3,1fr)}.hero b{font-size:1.5rem}.hero .play{width:54px;height:54px}}
 </style></head><body>
@@ -481,7 +484,7 @@ function start(){
  deck=[...pick,...pick].sort(()=>Math.random()-.5).map(x=>({e:x[0],n:x[1],p:x[2],m:-1,o:false}));
  teams=teams.map((t,i)=>({name:(t||"").trim()||"فريق "+(i+1),cards:[],c:col(i),no:i+1}));
  cur=-1;ch=false;fl=[];lock=false;rad=false;COLS=c;radT=[];radSec=0;CROWN=null;radarIdle();
- const g=$("grid");g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.gap="10px";
+ const g=$("grid");g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.gridTemplateRows=`repeat(${r},1fr)`;g.style.gap="10px";
  $("stage").style.width=`min(100%,calc((100dvh - 68px - ${(r-1)*10}px) * ${c/r} + ${(c-1)*10+36}px))`;
  g.innerHTML=deck.map((d,i)=>`<button class="c" id="k${i}" style="--i:${i}" aria-label="كرت ${i+1}" onclick="flip(${i})"><span class="in"><span class="face bk"><b class="sticker num">${i+1}</b></span><span class="face ft"><span class="em">${d.e}</span><span class="price"><span class="num">${d.p}</span> ريال</span></span></span></button>`).join("");
  show("game");draw();
@@ -497,7 +500,7 @@ function newGame(){CROWN=null;teams=teams.map(t=>t.name);show("setup");tl()}
 /* ---------- HUD ---------- */
 function draw(){
  const top=Math.max(1,...teams.map(t=>t.cards.length));
- $("teams").innerHTML=teams.map((t,i)=>`<button class="row ${i==cur?"hl":""} ${cur>=0&&i!=cur?"dim":""}" style="--tc:${t.c};animation:none" ${cur>=0?"disabled":""} onclick="pick(${i})"><span class="bar" style="width:${t.cards.length/top*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.name)}</span><span class="pt"><span class="num">${t.cards.length/2}</span><small>زوج</small></span></button>`).join("");
+ $("teams").innerHTML=teams.map((t,i)=>`<button class="row ${i==cur?"hl":""} ${cur>=0&&i!=cur?"dim":""}" style="--tc:${t.c};animation:none" ${cur>=0?"disabled":""} onclick="pick(${i})"><span class="bar" style="width:${t.cards.length/top*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.name)}</span><span class="pt"><span class="num">${t.cards.length/2}</span><small>بطاقة</small></span></button>`).join("");
  $("info").innerHTML=turnHTML({cur,ch,left,tot,A,teams:teams.map(t=>({n:t.name,c:t.c,no:t.no}))},false);
  sync();
 }
@@ -573,7 +576,7 @@ function nextR(){
  const iv=setInterval(()=>{
   if(k<t.its.length){const d=deck[t.its[k]];run+=d.p;$("tb"+id).insertAdjacentHTML("beforeend",`<div class="it"><span class="e">${d.e}</span><span class="n">${d.n}</span><span class="p"><span class="num">${d.p}</span> ريال</span><span class="run num">= ${run}</span></div>`);k++}
   else{clearInterval(iv);
-   $("sm"+id).innerHTML=t.its.length?`<div class="total"><span class="label" style="margin:0">المجموع</span><b><span class="num">${run}</span> ريال</b></div>`:`<div class="panel-sunken empty">لم يجمع أي زوج — المجموع <span class="num">0</span></div>`;
+   $("sm"+id).innerHTML=t.its.length?`<div class="total"><span class="label" style="margin:0">المجموع</span><b><span class="num">${run}</span> ريال</b></div>`:`<div class="panel-sunken empty">لم يجمع أي بطاقة — المجموع <span class="num">0</span></div>`;
    busy=false;b.disabled=false;b.innerHTML=id<RT.length-1?`احسب نتيجة «${esc(RT[id+1].name)}»`:`🏆 إعلان الفائز`;sync()}
  },700);
 }
@@ -668,7 +671,7 @@ function R(s){
   const C=s.cards||[];
   h+=`<div class="panel turn">${turnHTML({cur:s.cur,ch:s.ch,left:s.left,tot:s.tot,A:s.A,teams:T},true)}</div>
    <div class="panel"><p class="label">الكروت · اضغط للكشف</p><div class="mg" style="grid-template-columns:repeat(${s.cols},1fr)">${C.map((d,i)=>`<button class="mc ${d.v?"v":""} ${d.m>=0?"m":""} ${d.r?"r":""}" style="${d.m>=0&&T[d.m]?`--tc:${T[d.m].c}`:""}" aria-label="كرت ${i+1}" onclick="send({t:'flip',i:${i}})">${d.v?`<span class="e">${d.e}</span>`:`<b class="num">${i+1}</b>`}</button>`).join("")}</div></div>
-   <div class="panel"><p class="label">الفرق</p><div class="board-list">${T.map((t,i)=>`<button class="row ${i==s.cur?"hl":""} ${s.cur>=0&&i!=s.cur?"dim":""}" style="--tc:${t.c};animation:none" ${s.cur>=0?"disabled":""} onclick="send({t:'pick',i:${i}})"><span class="bar" style="width:${t.p/top2*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.n)}</span><span class="pt"><span class="num">${t.p}</span><small>زوج</small></span></button>`).join("")}</div></div>
+   <div class="panel"><p class="label">الفرق</p><div class="board-list">${T.map((t,i)=>`<button class="row ${i==s.cur?"hl":""} ${s.cur>=0&&i!=s.cur?"dim":""}" style="--tc:${t.c};animation:none" ${s.cur>=0?"disabled":""} onclick="send({t:'pick',i:${i}})"><span class="bar" style="width:${t.p/top2*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.n)}</span><span class="pt"><span class="num">${t.p}</span><small>بطاقة</small></span></button>`).join("")}</div></div>
    <div class="tools">
     <button class="btn teal lg full ${s.rad?"on":""}" ${s.rs>0?"disabled":""} onclick="send({t:'radar'})">${ICON_RADAR}${s.rs>0?`يُخفى بعد <span class="num">${s.rs}</span>`:s.rad?"اختر كرتاً · إلغاء":"الرادار"}</button>
     <button class="btn ghost full" onclick="$('dlg').showModal()">${ICON_STOP}إنهاء اللعبة</button>
