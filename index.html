@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2e6bff">
-<meta name="description" content="لعبة ذاكرة جماعية: اكشف الكروت، طابق الأزواج، واجمع أغلى الأغراض لفريقك.">
+<meta name="description" content="لعبة ذاكرة جماعية: اكشف الكروت، طابق البطاقات، واجمع أغلى الأغراض لفريقك.">
 <title>اكشف المستور</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='3' y='3' width='58' height='58' rx='18' fill='white' stroke='%2314213d' stroke-width='5'/><circle cx='28' cy='28' r='11' fill='%23ffc940' stroke='%2314213d' stroke-width='5'/><path d='M36 36l11 11' stroke='%2314213d' stroke-width='6' stroke-linecap='round'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -170,7 +170,11 @@ button.row:disabled{cursor:default}
 .c:not(.o):not(:disabled):hover .bk{background-color:var(--blue-400)}
 .c:not(.o):not(:disabled):active .bk{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
 .ft{transform:rotateY(180deg);flex-direction:column;gap:4cqmin;background:#fff}
-.em{font-size:46cqmin;line-height:1}
+.em{font-size:52cqmin;line-height:1}
+@container (min-aspect-ratio:13/10){
+ .em{font-size:min(64cqh,46cqw);margin-top:-14cqh}
+ .price{position:absolute;bottom:7cqh;font-size:clamp(.6rem,min(13cqh,8cqw),2rem)!important}
+}
 .price{font-size:clamp(.5rem,13cqmin,2rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
 .c.m .ft{background:color-mix(in srgb,var(--tc) 30%,#fff)}
 .c.m .price{background:#fff}
@@ -302,7 +306,7 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
 <header>
  <div class="logo" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="12" width="20" height="26" rx="5" fill="#ff5a5f" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="14" fill="#ffc940" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="6" fill="#fff" stroke="#14213d" stroke-width="3"/><path d="M46 40l10 10" stroke="#14213d" stroke-width="6" stroke-linecap="round"/></svg></div>
  <h1 class="sticker">اكشف المستور</h1>
- <p class="sub on-blue">طابِق الأزواج واجمع أغلى الأغراض لفريقك</p>
+ <p class="sub on-blue">طابِق البطاقات واجمع أغلى الأغراض لفريقك</p>
 </header>
 
 <main>
@@ -326,7 +330,7 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
     <p class="label">أقصى عدد محاولات في الدور</p>
     <div class="opts six" id="at" role="group" aria-label="أقصى عدد محاولات"></div>
    </div>
-   <div class="panel-sunken"><p class="hint">المحاولة = كشف كرتين. يظهر سعر الغرض عند كشفه، ويُحتسب سعره مرة واحدة للفريق الذي يفوز بزوجه. الرادار يكشف كرتاً وما حوله لمدة 5 ثوانٍ.</p></div>
+   <div class="panel-sunken"><p class="hint">المحاولة = كشف كرتين. يظهر سعر الغرض عند كشفه، ويُحتسب سعره مرة واحدة للفريق الذي يكسب البطاقة. الرادار يكشف كرتاً وما حوله لمدة 5 ثوانٍ.</p></div>
   </div>
   <button class="hero" onclick="start()">
    <span class="play"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span>
