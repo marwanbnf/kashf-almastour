@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e6bff">
+<meta name="description" content="لعبة ذاكرة جماعية: اكشف الكروت، طابق الأزواج، واجمع أغلى الأغراض لفريقك.">
+<title>اكشف المستور</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='3' y='3' width='58' height='58' rx='18' fill='white' stroke='%2314213d' stroke-width='5'/><circle cx='28' cy='28' r='11' fill='%23ffc940' stroke='%2314213d' stroke-width='5'/><path d='M36 36l11 11' stroke='%2314213d' stroke-width='6' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;700;800&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+ --bg-deep:#1a4fd8;--bg-base:#2e6bff;--bg-raise:#5b8cff;
+ --ink:#14213d;--ink-soft:#4a5578;
+ --text-hi:#14213d;--text-mid:#4a5578;--text-low:#8791b3;
+ --surface-1:rgba(20,33,61,.05);--surface-2:rgba(20,33,61,.09);--surface-sunken:#eef2ff;
+ --line-soft:rgba(20,33,61,.12);--line:rgba(20,33,61,.22);
+ --blue-300:#8fb4ff;--blue-400:#5b8cff;--blue-500:#2e6bff;--blue-600:#1a4fd8;
+ --gold-300:#ffe08a;--gold-400:#ffc940;--gold-500:#f0a20b;
+ --success:#1fb673;--success-fill:#2bd98b;--danger:#e5384f;--danger-fill:#ff5c6c;--cyan:#22d3ee;
+ --shadow-1:3px 3px 0 var(--ink);--shadow-2:5px 5px 0 var(--ink);--shadow-3:8px 8px 0 var(--ink);
+ --r-sm:.75rem;--r-md:1.1rem;--r-lg:1.6rem;--r-xl:2rem;
+ --ease-out:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);
+ --disp:"Baloo Bhaijaan 2","Cairo",Tahoma,sans-serif;--body:"Cairo",Tahoma,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scrollbar-color:rgba(255,255,255,.4) transparent}
+::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border-radius:99px;border:3px solid transparent;background-clip:padding-box}
+body{margin:0;min-height:100dvh;color:var(--text-hi);font-family:var(--body);font-weight:700;
+ padding:max(20px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom));
+ background-color:var(--bg-base);
+ background-image:
+  radial-gradient(38% 32% at 0% 0%,rgba(255,201,64,.22),transparent 70%),
+  radial-gradient(34% 30% at 100% 0%,rgba(255,255,255,.16),transparent 70%),
+  radial-gradient(36% 32% at 0% 100%,rgba(255,255,255,.14),transparent 70%),
+  radial-gradient(40% 36% at 100% 100%,rgba(34,211,238,.18),transparent 70%),
+  linear-gradient(160deg,var(--bg-raise),var(--bg-base) 50%,var(--bg-deep));
+ background-attachment:fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
+ background-image:radial-gradient(rgba(255,255,255,.35) 2px,transparent 2px);background-size:40px 40px}
+.w{position:relative;z-index:1;max-width:1240px;margin:auto}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue-600);outline-offset:3px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+svg.i{width:24px;height:24px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.i.s{width:18px;height:18px}
+
+/* ===== Stage text ===== */
+.sticker{color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;filter:drop-shadow(3px 3px 0 var(--ink))}
+.on-blue{color:#fff;filter:drop-shadow(1px 1px 0 var(--ink))}
+.label{font-size:.75rem;font-weight:800;letter-spacing:.18em;color:var(--text-low);margin:0 0 10px}
+
+/* ===== Header ===== */
+header{display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 0 28px;text-align:center}
+.logo{width:84px;height:84px;border-radius:30%;background:#fff;border:4px solid var(--ink);box-shadow:var(--shadow-2);display:grid;place-items:center;animation:float 5s ease-in-out infinite}
+.logo svg{width:58px;height:58px}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(2.6rem,8vw,4.2rem);line-height:1.05;margin:0}
+.sub{margin:0;font-size:1.05rem;font-weight:700}
+body.playing header{flex-direction:row;justify-content:center;gap:14px;padding:0 0 18px}
+body.playing .logo{width:56px;height:56px;border-width:3px}body.playing .logo svg{width:40px;height:40px}
+body.playing h1{font-size:clamp(1.8rem,4vw,2.4rem)}body.playing .sub{display:none}
+
+/* ===== Panels ===== */
+.panel{background:#fff;border:3px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--shadow-2);padding:24px}
+.panel-raised{border-width:4px;border-radius:var(--r-xl);box-shadow:var(--shadow-3)}
+.panel-sunken{background:var(--surface-sunken);border:3px solid var(--line);border-radius:var(--r-md);padding:14px 16px}
+.col{max-width:34rem;margin:auto;display:grid;gap:28px}
+.grp{display:grid;gap:10px}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;border-radius:var(--r-md);font-weight:800;line-height:1;
+ border:3px solid var(--ink);box-shadow:var(--shadow-2);cursor:pointer;height:48px;padding:0 20px;background:#fff;color:var(--ink);
+ transition:transform .12s var(--ease-out),box-shadow .12s var(--ease-out),background-color .15s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.btn:active:not(:disabled){transform:translate(5px,5px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{opacity:.45;filter:saturate(.6);cursor:not-allowed}
+.btn.sm{height:44px;padding:0 16px;font-size:.92rem}.btn.lg{height:56px;padding:0 28px;font-size:18px}.btn.xl{height:64px;padding:0 36px;font-size:20px}
+.btn.gold{background:var(--gold-400)}.btn.gold:hover:not(:disabled){background:var(--gold-300)}
+.btn.primary{background:var(--blue-500);color:#fff}.btn.primary:hover:not(:disabled){background:var(--blue-400)}
+.btn.teal{background:var(--cyan)}
+.btn.danger{background:var(--danger-fill);color:#fff}
+.btn.ghost{background:#fff}.btn.ghost:hover:not(:disabled){background:linear-gradient(var(--surface-1),var(--surface-1)),#fff}
+.btn.quiet{background:transparent;border:0;box-shadow:none}
+.btn.icon{border-radius:999px;width:44px;height:44px;padding:0;box-shadow:var(--shadow-1)}
+.btn.icon:active:not(:disabled){transform:translate(3px,3px)}
+.btn.full{width:100%}
+
+.hero{position:relative;overflow:hidden;width:100%;display:flex;align-items:center;gap:18px;text-align:start;padding:20px 22px;cursor:pointer;
+ background:var(--gold-400);border:4px solid var(--ink);border-radius:var(--r-xl);box-shadow:var(--shadow-3);color:var(--ink);
+ transition:transform .14s var(--ease-out),box-shadow .14s var(--ease-out)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 45%,transparent 60%);transform:translateX(120%);pointer-events:none}
+.hero:hover{transform:translate(-3px,-3px);box-shadow:11px 11px 0 var(--ink)}
+.hero:hover::after{transition:transform .7s var(--ease-out);transform:translateX(-120%)}
+.hero:active{transform:translate(8px,8px);box-shadow:0 0 0 var(--ink)}
+.hero .play{flex:0 0 auto;width:64px;height:64px;border-radius:50%;background:#fff;border:3px solid var(--ink);display:grid;place-items:center}
+.hero .play svg{width:28px;height:28px;fill:var(--ink);margin-inline-start:-4px;transform:scaleX(-1)}
+.hero b{display:block;font-family:var(--disp);font-weight:800;font-size:1.9rem;line-height:1.1}
+.hero span.d{display:block;font-size:.95rem;font-weight:700;color:var(--ink-soft);margin-top:2px}
+
+/* ===== Inputs ===== */
+.inp{flex:1;min-width:0;height:48px;border-radius:var(--r-md);border:3px solid var(--ink);background:var(--surface-sunken);color:var(--ink);font-weight:800;padding:0 14px;
+ transition:background-color .15s,box-shadow .15s}
+.inp::placeholder{color:var(--text-low);font-weight:400}
+.inp:focus{outline:none;background:#fff;box-shadow:3px 3px 0 var(--blue-500)}
+
+/* ===== Chips / avatars ===== */
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:3px solid var(--ink);background:#fff;padding:6px 14px;font-size:.75rem;font-weight:800;box-shadow:var(--shadow-1);color:var(--ink)}
+.chip svg{color:var(--blue-500)}
+.av{flex:0 0 auto;width:44px;height:44px;border-radius:30%;display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:1.25rem;color:var(--ink);
+ background:linear-gradient(145deg,color-mix(in srgb,var(--tc) 88%,#fff),var(--tc));border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.av.sm{width:34px;height:34px;font-size:1rem;border-width:2.5px}
+
+/* ===== Setup ===== */
+.trow{display:flex;align-items:center;gap:10px;animation:enter .5s var(--spring) both}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+.opts.six{grid-template-columns:repeat(6,1fr)}
+.opt{height:auto;padding:12px 6px;flex-direction:column;gap:4px;box-shadow:var(--shadow-1)}
+.opt:active:not(:disabled){transform:translate(3px,3px)}
+.opt small{font-size:.72rem;color:var(--text-mid);font-weight:700}
+.opt[aria-pressed=true]{background:var(--blue-500);color:#fff}
+.opt[aria-pressed=true] small{color:#dbe6ff}
+.opt b{font-size:1.15rem;font-weight:900}
+.hint{margin:0;font-size:.92rem;line-height:1.8;color:var(--text-mid);text-wrap:pretty}
+.err{margin:0;min-height:1.5em;text-align:center;color:#fff;font-weight:800}
+.err:not(:empty){background:var(--danger-fill);border:3px solid var(--ink);border-radius:var(--r-md);box-shadow:var(--shadow-1);padding:10px;animation:shake .4s}
+
+/* ===== Game layout ===== */
+.game{display:grid;gap:22px;align-items:start}
+@media (min-width:1000px){.game{grid-template-columns:330px 1fr}.side{position:sticky;top:16px}}
+.side{display:grid;gap:18px}
+.turn{text-align:center;padding:20px 18px}
+.turn .who{font-family:var(--disp);font-weight:800;font-size:clamp(1.7rem,4vw,2.3rem);line-height:1.15;margin:6px 0 0}
+.turn .label{margin:0}
+.pips{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.pip{width:22px;height:22px;border-radius:50%;border:3px solid var(--ink);background:var(--gold-400);box-shadow:2px 2px 0 var(--ink);transition:.3s var(--spring)}
+.pip.off{background:var(--surface-sunken);box-shadow:none;transform:scale(.8)}
+.picks{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+.picks .btn{width:56px;height:56px;padding:0;font-size:1.4rem;animation:enter .45s var(--spring) both}
+.turn .btn.rnd{margin-top:14px}
+
+.board-list{display:grid;gap:10px}
+.row{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:var(--r-md);border:3px solid var(--line);
+ background:var(--surface-1);text-align:start;color:var(--ink);transition:transform .2s var(--ease-out),border-color .2s,box-shadow .2s;animation:enter .5s var(--spring) both}
+.row .bar{position:absolute;inset-block:0;inset-inline-start:0;background:color-mix(in srgb,var(--tc) 16%,transparent);transition:width .6s var(--ease-out)}
+.row>*:not(.bar){position:relative}
+.row .nm{flex:1;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .pt{font-family:var(--disp);font-weight:800;font-size:1.15rem}
+.row .pt small{font-family:var(--body);font-size:.72rem;color:var(--text-mid);margin-inline-start:4px}
+.row.hl{border-color:var(--ink);background:rgba(255,201,64,.15);box-shadow:4px 4px 0 var(--gold-500)}
+button.row{cursor:pointer}
+button.row:not(:disabled):hover{border-color:var(--ink)}
+button.row:disabled{cursor:default}
+.row.dim{opacity:.5}
+
+.tools{display:grid;gap:12px}
+.btn.teal.on{animation:pulse 2s infinite}
+
+/* ===== Board ===== */
+.stage{padding:clamp(10px,2vw,20px)}
+.grid{display:grid;gap:clamp(6px,1.3vw,12px);direction:rtl;margin:auto}
+.c{position:relative;aspect-ratio:1;padding:0;border:0;background:none;cursor:pointer;perspective:800px;container-type:inline-size;
+ animation:deal .5s var(--spring) both;animation-delay:calc(var(--i) * 16ms)}
+.in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s var(--spring)}
+.c.o .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:var(--r-sm);border:3px solid var(--ink);box-shadow:var(--shadow-1);display:flex;align-items:center;justify-content:center;
+ backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.bk{background:var(--blue-500);background-image:radial-gradient(rgba(255,255,255,.28) 2px,transparent 2px);background-size:14px 14px;transition:transform .12s var(--ease-out),box-shadow .12s,background-color .15s}
+.bk b{font-family:var(--disp);font-weight:800;font-size:clamp(.9rem,36cqi,2.4rem);line-height:1}
+.c:not(.o):not(:disabled):hover .bk{background-color:var(--blue-400)}
+.c:not(.o):not(:disabled):active .bk{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.ft{transform:rotateY(180deg);flex-direction:column;gap:4cqi;background:#fff}
+.em{font-size:44cqi;line-height:1}
+.price{font-size:clamp(.5rem,12.5cqi,.95rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
+.c.m .ft{background:color-mix(in srgb,var(--tc) 30%,#fff)}
+.c.m .price{background:#fff}
+.c.m .tag{position:absolute;top:-8px;inset-inline-end:-8px;width:clamp(18px,30cqi,30px);height:clamp(18px,30cqi,30px);border-radius:30%;background:var(--tc);border:2.5px solid var(--ink);
+ display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(.6rem,16cqi,.95rem);box-shadow:2px 2px 0 var(--ink)}
+.c.m{animation:pop .55s var(--spring);cursor:default}
+.c.no .in{animation:shake .45s ease}
+.c.rd .ft{background:#e0fbff;box-shadow:0 0 0 3px var(--cyan),var(--shadow-1)}
+
+/* ===== Results ===== */
+.res{max-width:44rem;margin:auto;display:grid;gap:22px}
+.res-head{text-align:center}
+.res-head h2{font-family:var(--disp);font-weight:800;font-size:clamp(2.2rem,7vw,3.4rem);margin:0;line-height:1.1}
+.rcard{animation:enter .55s var(--spring) both}
+.rcard h3{display:flex;align-items:center;gap:12px;margin:0 0 14px;font-family:var(--disp);font-weight:800;font-size:1.5rem}
+.items{display:grid;gap:8px}
+.it{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--r-md);border:3px solid var(--line);background:var(--surface-1);animation:enter .45s var(--spring) both}
+.it .e{font-size:1.6rem}.it .n{flex:1;font-weight:800}
+.it .p{font-weight:900}.it .run{min-width:4.5em;text-align:end;color:var(--text-low);font-size:.85rem}
+.total{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.total b{font-family:var(--disp);font-weight:800;font-size:2rem}
+.shim{height:48px;border-radius:var(--r-md);border:3px solid var(--line);background:linear-gradient(100deg,var(--surface-sunken) 30%,#fff 50%,var(--surface-sunken) 70%);background-size:300% 100%;animation:shimmer 1.2s linear infinite}
+.empty{padding:16px;text-align:center;color:var(--text-mid)}
+.winner{text-align:center;background:var(--gold-400)}
+.winner .trophy{width:96px;height:96px;margin:0 auto 8px;border-radius:50%;background:#fff;border:4px solid var(--ink);box-shadow:var(--shadow-2);display:grid;place-items:center;font-size:3rem;animation:float 5s ease-in-out infinite}
+.winner h2{font-family:var(--disp);font-weight:800;font-size:clamp(2rem,7vw,3rem);margin:0;line-height:1.1}
+.winner .label{color:var(--ink-soft)}
+.final{display:grid;gap:10px;margin-top:20px;text-align:start}
+.final .row{background:#fff}
+.final .row.hl{background:linear-gradient(rgba(255,201,64,.15),rgba(255,201,64,.15)),#fff}
+.medal{width:2em;text-align:center;font-size:1.4rem}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.confetti i{position:absolute;top:-24px;width:12px;height:16px;border:2px solid var(--ink);border-radius:3px;animation:fall linear forwards}
+
+/* ===== Dialog ===== */
+dialog{border:4px solid var(--ink);border-radius:var(--r-xl);box-shadow:var(--shadow-3);background:#fff;color:var(--ink);padding:26px;width:min(400px,calc(100vw - 32px));text-align:center}
+dialog::backdrop{background:rgba(20,33,61,.55)}
+dialog[open]{animation:pop .4s var(--spring)}
+dialog h2{font-family:var(--disp);font-weight:800;font-size:1.8rem;margin:0 0 6px}
+dialog p{color:var(--text-mid);margin:0 0 20px}
+.dlg-b{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.hide{display:none!important}
+.view{animation:enter .55s var(--spring) both}
+
+@keyframes enter{from{opacity:0;transform:translateY(22px)}}
+@keyframes deal{from{opacity:0;transform:translateY(-22px) scale(.85)}}
+@keyframes float{50%{transform:translateY(-8px)}}
+@keyframes pop{0%{transform:scale(.9)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{translate:0}20%,60%{translate:-6px}40%,80%{translate:6px}}
+@keyframes pulse{0%{box-shadow:var(--shadow-2),0 0 0 0 rgba(255,201,64,.9)}100%{box-shadow:var(--shadow-2),0 0 0 16px rgba(255,201,64,0)}}
+@keyframes shimmer{to{background-position:-150% 0}}
+@keyframes fall{to{transform:translateY(112vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* ===== Setup + QR ===== */
+.setup{display:grid;gap:28px;max-width:62rem;margin:auto;align-items:start}
+.setup .col{max-width:none;margin:0}
+@media (min-width:900px){.setup{grid-template-columns:1fr 21rem}.qrp{position:sticky;top:16px}}
+.qrp{display:grid;gap:14px;text-align:center;justify-items:center}
+.qrp h2{font-family:var(--disp);font-weight:800;font-size:1.6rem;line-height:1.15;margin:0}
+.qrbox{width:100%;max-width:240px;aspect-ratio:1;background:#fff;border:3px solid var(--ink);border-radius:var(--r-md);box-shadow:var(--shadow-1);padding:12px;display:grid;place-items:center}
+.qrbox.lg{max-width:320px}
+.qrbox img,.qrbox canvas{width:100%!important;height:auto!important;image-rendering:pixelated;display:block}
+.qrbox canvas+img{display:none}
+.code{font-family:var(--disp);font-weight:800;font-size:1.5rem;letter-spacing:.2em;background:var(--surface-sunken);border:3px dashed var(--line);border-radius:var(--r-sm);padding:4px 14px}
+.live .ld{width:12px;height:12px;border-radius:50%;background:var(--text-low);border:2px solid var(--ink)}
+.live.ok .ld{background:var(--success-fill)}
+.live.ok{background:#e3fbef}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:8px;text-align:start;font-size:.9rem;color:var(--text-mid)}
+.steps li{display:flex;gap:10px;align-items:flex-start}
+.steps b{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--gold-400);border:2px solid var(--ink);display:grid;place-items:center;font-size:.75rem;color:var(--ink)}
+.warn{font-size:.82rem;color:var(--ink);background:var(--gold-300);border:2px solid var(--ink);border-radius:var(--r-sm);padding:8px 10px;margin:0}
+
+/* ===== Corner QR button ===== */
+.fab{position:fixed;z-index:30;top:max(14px,env(safe-area-inset-top));inset-inline-end:14px;width:56px;height:56px;border-radius:999px;padding:0;
+ box-shadow:var(--shadow-2)}
+.fab:active:not(:disabled){transform:translate(5px,5px)}
+.fab .dotx{position:absolute;top:-4px;inset-inline-start:-4px;width:18px;height:18px;border-radius:50%;border:3px solid var(--ink);background:var(--text-low)}
+.fab.ok .dotx{background:var(--success-fill)}
+#qrdlg{width:min(440px,calc(100vw - 32px))}
+#qrdlg .qrbox{margin:0 auto 14px}
+
+/* ===== Phone remote ===== */
+.rm{max-width:30rem;margin:auto;display:grid;gap:18px}
+.rm-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mg{display:grid;gap:6px;direction:rtl}
+.mc{position:relative;aspect-ratio:1;padding:0;border:2.5px solid var(--ink);border-radius:.6rem;background:var(--blue-500);box-shadow:2px 2px 0 var(--ink);
+ display:grid;place-items:center;cursor:pointer;container-type:inline-size;transition:transform .1s,box-shadow .1s}
+.mc:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.mc b{font-family:var(--disp);font-weight:800;font-size:clamp(.7rem,40cqi,1.4rem);color:#fff;-webkit-text-stroke:1.5px var(--ink);paint-order:stroke fill}
+.mc.v{background:#fff}
+.mc .e{font-size:52cqi;line-height:1}
+.mc.m{background:color-mix(in srgb,var(--tc) 35%,#fff)}
+.mc.r{background:#e0fbff;box-shadow:0 0 0 2px var(--cyan),2px 2px 0 var(--ink)}
+.rm .turn{padding:16px}
+.rm .who{font-size:1.7rem}
+.wait{text-align:center;display:grid;gap:12px;justify-items:center}
+
+@media (max-width:560px){.panel{padding:18px}.opts.six{grid-template-columns:repeat(3,1fr)}.hero b{font-size:1.5rem}.hero .play{width:54px;height:54px}}
+</style></head><body>
+<div class="w">
+<header>
+ <div class="logo" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="12" width="20" height="26" rx="5" fill="#ff5a5f" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="14" fill="#ffc940" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="6" fill="#fff" stroke="#14213d" stroke-width="3"/><path d="M46 40l10 10" stroke="#14213d" stroke-width="6" stroke-linecap="round"/></svg></div>
+ <h1 class="sticker">اكشف المستور</h1>
+ <p class="sub on-blue">طابِق الأزواج واجمع أغلى الأغراض لفريقك</p>
+</header>
+
+<main>
+<!-- ================= SETUP ================= -->
+<section id="setup" class="setup view" aria-label="إعداد اللعبة">
+ <div class="col">
+  <div class="panel panel-raised" style="display:grid;gap:26px">
+   <div class="grp">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+     <p class="label" style="margin:0">الفرق</p>
+     <span class="chip"><svg class="i s" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg><span id="tcount" class="num">2</span> فرق</span>
+    </div>
+    <div id="tl" class="grp"></div>
+    <button class="btn ghost full" id="addb" onclick="addT()"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>إضافة فريق</button>
+   </div>
+   <div class="grp">
+    <p class="label">حجم اللوحة · صفوف × أعمدة</p>
+    <div class="opts" id="sz" role="group" aria-label="حجم اللوحة"></div>
+   </div>
+   <div class="grp">
+    <p class="label">أقصى عدد محاولات في الدور</p>
+    <div class="opts six" id="at" role="group" aria-label="أقصى عدد محاولات"></div>
+   </div>
+   <div class="panel-sunken"><p class="hint">المحاولة = كشف كرتين. يظهر سعر الغرض عند كشفه، ويُحتسب سعره مرة واحدة للفريق الذي يفوز بزوجه. الرادار يكشف كرتاً وما حوله لمدة 5 ثوانٍ.</p></div>
+  </div>
+  <button class="hero" onclick="start()">
+   <span class="play"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span>
+   <span><b>ابدأ اللعبة</b><span class="d">وزّع الكروت وخلّ أول فريق يبدأ</span></span>
+  </button>
+  <p class="err" id="err" role="alert"></p>
+ </div>
+
+ <aside class="panel panel-raised qrp" id="qrp" aria-label="تحكم المقدم من الجوال"></aside>
+</section>
+
+<!-- ================= GAME ================= -->
+<section id="game" class="game hide" aria-label="اللعبة">
+ <aside class="side">
+  <div class="panel turn" id="info" aria-live="polite"></div>
+  <div class="panel">
+   <p class="label">لوحة الفرق</p>
+   <div class="board-list" id="teams"></div>
+  </div>
+  <div class="tools">
+   <button class="btn teal lg full" id="rb" onclick="radar()"></button>
+   <button class="btn ghost full" onclick="$('dlg').showModal()"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>إنهاء اللعبة</button>
+  </div>
+ </aside>
+ <div class="panel panel-raised stage"><div class="grid" id="grid"></div></div>
+</section>
+
+<!-- ================= END ================= -->
+<section id="end" class="res hide"></section>
+
+<!-- ================= PHONE REMOTE ================= -->
+<section id="remote" class="rm hide" aria-label="لوحة المقدم"></section>
+</main>
+</div>
+
+<button class="btn gold fab hide" id="fab" aria-label="عرض باركود المقدم" onclick="openQR()"><span class="dotx"></span>
+ <svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 19.5h1M20.5 14v1.5"/></svg></button>
+
+<dialog id="qrdlg">
+ <h2>تحكم من الجوال</h2>
+ <p>صوّر الباركود بجوال المقدم عشان يتحكم باللعبة.</p>
+ <div class="qrbox lg" id="qr2"></div>
+ <p style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap"><span class="code num" id="code2"></span><span class="chip live" id="live2"><span class="ld"></span><span class="lt">بانتظار المقدم</span></span></p>
+ <button class="btn gold lg full" onclick="$('qrdlg').close()">تم</button>
+</dialog>
+
+<dialog id="dlg">
+ <h2>إنهاء اللعبة؟</h2>
+ <p>سيتوقف اللعب ونحسب نتائج كل الفرق الآن.</p>
+ <div class="dlg-b">
+  <button class="btn ghost" onclick="$('dlg').close()">متابعة</button>
+  <button class="btn danger" onclick="$('dlg').close();doFinish()">احسب النتائج</button>
+ </div>
+</dialog>
+
+<script>
+/* ============================================================
+   إعدادات Firebase — الصق هنا إعدادات مشروعك من:
+   Firebase Console ← Project settings ← Your apps ← Web app
+   (لازم يكون فيها databaseURL بعد ما تفعّل Realtime Database)
+   ============================================================ */
+const FIREBASE_CONFIG={
+ apiKey:"AIzaSyDx2y5d3wFHykP87XA7ooWL4MrrBsXy8m0",
+ authDomain:"kashf-almastour.firebaseapp.com",
+ databaseURL:"https://kashf-almastour-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId:"kashf-almastour",
+ storageBucket:"kashf-almastour.firebasestorage.app",
+ messagingSenderId:"780594467904",
+ appId:"1:780594467904:web:d56063beb108e75a1bfba5"
+};
+
+const ITEMS=[["🛋️","أريكة"],["🛏️","سرير"],["📺","تلفزيون"],["🧺","سلة غسيل"],["🧹","مكنسة"],["🍳","مقلاة"],["🫖","إبريق شاي"],["🪑","كرسي"],["🚿","دش"],["🔌","شاحن"],["💡","مصباح"],["🪞","مرآة"],["🕰️","ساعة جدار"],["🧊","ثلاجة"],["🪟","نافذة"],["🚪","باب"],["🧯","طفاية"],["🛁","حوض استحمام"],["🧼","صابون"],["🪴","نبتة زينة"],["🍴","طقم أدوات"],["🔪","سكين مطبخ"],["🧽","إسفنجة"],["📻","راديو"]];
+[200,195,190,185,180,175,170,165,160,160,155,155,150,150,145,140,135,130,125,120,115,110,105,100].forEach((p,k)=>ITEMS[k][2]=p);
+const SZ=[[4,4],[4,5],[5,6],[6,6],[6,7],[6,8]];
+const COLORS=["#ff5a5f","#3b9eff","#1fb673","#ffc940","#8b5cf6","#ff6bc1","#14b8b8","#fb923c"];
+const MAXT=COLORS.length;
+let teams=[],deck=[],cur=-1,left=0,tot=0,A=3,SI=0,fl=[],lock=false,ch=false,rad=false,COLS=4;
+let SCR="setup",radT=[],radSec=0,CROWN=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const col=i=>COLORS[i%COLORS.length];
+const ICON_RADAR=`<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>`;
+const ICON_X=`<svg class="i s" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+const ICON_DICE=`<svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></svg>`;
+const ICON_PLUS=`<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
+const ICON_STOP=`<svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+const ICON_PHONE=`<svg class="i s" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>`;
+
+/* ---------- Roles & sync ---------- */
+const HOSTROOM=new URLSearchParams(location.search).get("host");
+let NET=null,ROOM=null,HOSTON=false,syncT=0;
+function sync(){if(!NET||!ROOM)return;clearTimeout(syncT);syncT=setTimeout(()=>{try{NET.publishState(ROOM,snap())}catch(e){console.warn(e)}},40)}
+function snap(){
+ const g=SCR!="setup",nb=$("nb");
+ return{
+  scr:SCR,A,SI,max:MAXT,err:$("err").textContent||"",
+  teams:g?teams.map(t=>({n:t.name,c:t.c,no:t.no,p:t.cards.length/2})):teams.map((t,i)=>({n:String(t),c:col(i),no:i+1,p:0})),
+  cur,ch:ch?1:0,left,tot,rad:rad?1:0,rs:radSec,lock:lock?1:0,cols:COLS,
+  cards:SCR=="game"?deck.map((d,i)=>{const r=radT.includes(i),v=d.o||d.m>=0||r;return{v:v?1:0,e:v?d.e:"",p:v?d.p:0,m:d.m,r:r?1:0}}):[],
+  res:SCR=="end"?RT.slice(0,ri+1).map((t,k)=>({n:t.name,c:t.c,no:t.no,s:(k<ri||!busy)?t.sum:-1})):[],
+  nb:nb?{l:nb.textContent.trim(),d:nb.disabled?1:0}:{l:"",d:1},
+  win:CROWN||{},t:Date.now()
+ };
+}
+function run(c){
+ if(!c||typeof c!="object")return;const i=c.i|0,n=c.n|0;
+ switch(c.t){
+  case"add":if(SCR=="setup")addT();break;
+  case"del":if(SCR=="setup"&&i<teams.length){teams.splice(i,1);tl()}break;
+  case"name":if(SCR=="setup"&&i<teams.length){teams[i]=String(c.v||"").slice(0,24);tl()}break;
+  case"size":if(SCR=="setup"&&SZ[i]){SI=i;seg()}break;
+  case"att":if(SCR=="setup"&&n>=1&&n<=6){A=n;seg()}break;
+  case"start":if(SCR=="setup")start();break;
+  case"rnd":if(SCR=="game"&&cur<0&&!lock)rnd();break;
+  case"pick":if(SCR=="game"&&cur<0&&!lock&&teams[i])pick(i);break;
+  case"setA":if(SCR=="game"&&ch&&n>=1&&n<=A)setA(n);break;
+  case"flip":if(SCR=="game"&&i<deck.length)flip(i);break;
+  case"radar":if(SCR=="game")radar();break;
+  case"finish":if(SCR=="game")finish();break;
+  case"next":if(SCR=="end"&&$("nb"))nextR();break;
+  case"new":if(SCR=="end"&&CROWN)newGame();break;
+ }
+}
+function doFinish(){if(HOSTROOM)send({t:"finish"});else finish()}
+
+/* ---------- Setup ---------- */
+function tl(){
+ $("tl").innerHTML=teams.map((t,i)=>`<div class="trow" style="--tc:${col(i)};animation-delay:${i*40}ms"><span class="av num" aria-hidden="true">${i+1}</span><input class="inp" value="${esc(t)}" placeholder="اسم الفريق" aria-label="اسم الفريق ${i+1}" maxlength="24" oninput="teams[${i}]=this.value" onchange="sync()"><button class="btn ghost icon" aria-label="حذف الفريق" onclick="teams.splice(${i},1);tl()">${ICON_X}</button></div>`).join("");
+ $("tcount").textContent=teams.length;
+ $("addb").disabled=teams.length>=MAXT;
+ sync();
+}
+function addT(){if(teams.length>=MAXT)return;teams.push("الفريق "+(teams.length+1));$("err").textContent="";tl()}
+function seg(){
+ $("sz").innerHTML=SZ.map((s,i)=>`<button class="btn ghost opt" aria-pressed="${i==SI}" onclick="SI=${i};seg()"><b class="num">${s[0]} × ${s[1]}</b><small><span class="num">${s[0]*s[1]}</span> كرت</small></button>`).join("");
+ $("at").innerHTML=[1,2,3,4,5,6].map(n=>`<button class="btn ghost opt" aria-pressed="${n==A}" onclick="A=${n};seg()"><b class="num">${n}</b></button>`).join("");
+ sync();
+}
+
+function start(){
+ if(teams.length<2){$("err").textContent="أضف فريقين على الأقل لبدء اللعبة.";sync();return}
+ const [r,c]=SZ[SI],n=r*c/2;
+ if(r*c%2){$("err").textContent="عدد الكروت يجب أن يكون زوجياً.";sync();return}
+ $("err").textContent="";
+ const pick=[...ITEMS].sort(()=>Math.random()-.5).slice(0,n);
+ deck=[...pick,...pick].sort(()=>Math.random()-.5).map(x=>({e:x[0],n:x[1],p:x[2],m:-1,o:false}));
+ teams=teams.map((t,i)=>({name:(t||"").trim()||"فريق "+(i+1),cards:[],c:col(i),no:i+1}));
+ cur=-1;ch=false;fl=[];lock=false;rad=false;COLS=c;radT=[];radSec=0;CROWN=null;radarIdle();
+ const g=$("grid");g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.maxWidth=`min(100%,${c<=5?640:9999}px,calc((100dvh - 150px) * ${c/r}))`;
+ g.innerHTML=deck.map((d,i)=>`<button class="c" id="k${i}" style="--i:${i}" aria-label="كرت ${i+1}" onclick="flip(${i})"><span class="in"><span class="face bk"><b class="sticker num">${i+1}</b></span><span class="face ft"><span class="em">${d.e}</span><span class="price"><span class="num">${d.p}</span> ريال</span></span></span></button>`).join("");
+ show("game");draw();
+}
+function show(id){
+ SCR=id;document.body.classList.toggle("playing",id=="game");
+ ["setup","game","end"].forEach(x=>{$(x).classList.toggle("hide",x!=id);$(x).classList.toggle("view",x==id)});
+ $("fab").classList.toggle("hide",!NET||!ROOM||id=="setup");
+ window.scrollTo({top:0});sync();
+}
+function newGame(){CROWN=null;teams=teams.map(t=>t.name);show("setup");tl()}
+
+/* ---------- HUD ---------- */
+function draw(){
+ const top=Math.max(1,...teams.map(t=>t.cards.length));
+ $("teams").innerHTML=teams.map((t,i)=>`<button class="row ${i==cur?"hl":""} ${cur>=0&&i!=cur?"dim":""}" style="--tc:${t.c};animation:none" ${cur>=0?"disabled":""} onclick="pick(${i})"><span class="bar" style="width:${t.cards.length/top*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.name)}</span><span class="pt"><span class="num">${t.cards.length/2}</span><small>زوج</small></span></button>`).join("");
+ $("info").innerHTML=turnHTML({cur,ch,left,tot,A,teams:teams.map(t=>({n:t.name,c:t.c,no:t.no}))},false);
+ sync();
+}
+/* Shared by the display and the phone */
+function turnHTML(s,remote){
+ const act=remote?(c)=>`send(${JSON.stringify(c).replace(/"/g,"'")})`:(c)=>c.t=="rnd"?"rnd()":`setA(${c.n})`;
+ if(s.cur<0)return`<p class="label">الجولة التالية</p><p class="who">مَن الفريق اللي بيلعب؟</p><p class="hint" style="margin-top:6px">${remote?"اختر فريقاً من القائمة تحت أو":"اضغط على اسم فريق من اللوحة أو"}</p><button class="btn gold lg rnd" onclick="${act({t:"rnd"})}">${ICON_DICE}اختيار عشوائي</button>`;
+ const t=s.teams[s.cur];if(!t)return"";
+ if(s.ch)return`<p class="label">كم محاولة؟</p><p class="who">${esc(t.n)}</p><div class="picks">${Array.from({length:s.A},(_,k)=>`<button class="btn gold num" style="animation-delay:${k*45}ms" onclick="${act({t:"setA",n:k+1})}">${k+1}</button>`).join("")}</div>`;
+ return`<p class="label">الدور الحالي</p><p class="who" style="display:flex;align-items:center;justify-content:center;gap:10px"><span class="av sm num" style="--tc:${t.c}">${t.no}</span>${esc(t.n)}</p><div class="pips" aria-label="المحاولات المتبقية ${s.left} من ${s.tot}">${Array.from({length:s.tot},(_,k)=>`<span class="pip ${k<s.left?"":"off"}"></span>`).join("")}</div><p class="hint" style="margin-top:8px">المحاولات المتبقية: <span class="num">${s.left}</span></p>`;
+}
+function rnd(){pick(Math.random()*teams.length|0)}
+function pick(i){cur=i;left=0;ch=true;draw()}
+function setA(n){left=tot=n;ch=false;draw()}
+
+/* ---------- Play ---------- */
+function flip(i){
+ if(rad&&!lock){radarAt(i);return}
+ if(cur<0||ch||lock||deck[i].o||deck[i].m>=0)return;
+ deck[i].o=true;$("k"+i).classList.add("o");fl.push(i);
+ if(fl.length<2){sync();return}
+ lock=true;const[a,b]=fl;fl=[];left--;draw();
+ setTimeout(()=>{
+  if(deck[a].e==deck[b].e){
+   [a,b].forEach(x=>{deck[x].m=cur;const el=$("k"+x);el.style.setProperty("--tc",teams[cur].c);el.classList.add("m");
+    el.querySelector(".ft").insertAdjacentHTML("beforeend",`<span class="tag num">${teams[cur].no}</span>`)});
+   teams[cur].cards.push(a,b);after()}
+  else{[a,b].forEach(x=>$("k"+x).classList.add("no"));
+   setTimeout(()=>{[a,b].forEach(x=>{deck[x].o=false;$("k"+x).classList.remove("o","no")});after()},450)}
+ },900);
+}
+function after(){
+ lock=false;
+ if(deck.every(d=>d.m>=0))return setTimeout(finish,700);
+ if(left<=0)cur=-1;
+ draw();
+}
+
+/* ---------- Radar ---------- */
+function radarIdle(){const b=$("rb");b.className="btn teal lg full";b.disabled=false;b.innerHTML=ICON_RADAR+"الرادار"}
+function radar(){
+ if(lock||fl.length)return;rad=!rad;const b=$("rb");
+ if(rad){b.classList.add("on");b.innerHTML=ICON_RADAR+"اختر كرتاً · إلغاء"}else radarIdle();
+ sync();
+}
+function radarAt(i){
+ rad=false;const b=$("rb"),n=deck.length,c=i%COLS,s=[i];
+ if(i-COLS>=0)s.push(i-COLS);if(i+COLS<n)s.push(i+COLS);if(c>0)s.push(i-1);if(c<COLS-1)s.push(i+1);
+ const t=s.filter(x=>deck[x].m<0);radT=t;
+ lock=true;b.disabled=true;b.classList.remove("on");t.forEach(x=>$("k"+x).classList.add("o","rd"));
+ radSec=5;const lbl=()=>{b.innerHTML=`${ICON_RADAR}يُخفى بعد <span class="num">${radSec}</span>`;sync()};lbl();
+ const iv=setInterval(()=>{radSec--;
+  if(radSec<=0){clearInterval(iv);t.forEach(x=>$("k"+x).classList.remove("o","rd"));radT=[];radSec=0;lock=false;radarIdle();sync()}else lbl()},1000);
+}
+
+/* ---------- Results ---------- */
+let RT=[],ri=-1,busy=false;
+function finish(){
+ if(SCR!="game")return;
+ RT=teams.map(t=>{const its=t.cards.filter((_,k)=>k%2==0);return{name:t.name,c:t.c,no:t.no,its,sum:its.reduce((s,i)=>s+deck[i].p,0)}});
+ ri=-1;busy=false;rad=false;CROWN=null;
+ $("end").innerHTML=`<div class="res-head"><p class="sub on-blue">انتهت اللعبة 🎉</p><h2 class="sticker">لحظة الحساب</h2></div><div id="res" style="display:grid;gap:22px"></div><button class="btn gold xl full" id="nb" onclick="nextR()"><svg class="i" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>عرض النتائج</button>`;
+ show("end");
+}
+function nextR(){
+ if(busy)return;const b=$("nb");
+ if(ri>=RT.length-1)return crown();
+ ri++;const t=RT[ri],id=ri;busy=true;b.disabled=true;
+ const box=document.createElement("div");box.className="panel rcard";box.style.setProperty("--tc",t.c);
+ box.innerHTML=`<h3><span class="av num">${t.no}</span>${esc(t.name)}</h3><div class="items" id="tb${id}"></div><div id="sm${id}" style="margin-top:8px"><div class="shim"></div></div>`;
+ $("res").appendChild(box);box.scrollIntoView({behavior:"smooth",block:"center"});sync();
+ let k=0,run=0;
+ const iv=setInterval(()=>{
+  if(k<t.its.length){const d=deck[t.its[k]];run+=d.p;$("tb"+id).insertAdjacentHTML("beforeend",`<div class="it"><span class="e">${d.e}</span><span class="n">${d.n}</span><span class="p"><span class="num">${d.p}</span> ريال</span><span class="run num">= ${run}</span></div>`);k++}
+  else{clearInterval(iv);
+   $("sm"+id).innerHTML=t.its.length?`<div class="total"><span class="label" style="margin:0">المجموع</span><b><span class="num">${run}</span> ريال</b></div>`:`<div class="panel-sunken empty">لم يجمع أي زوج — المجموع <span class="num">0</span></div>`;
+   busy=false;b.disabled=false;b.innerHTML=id<RT.length-1?`احسب نتيجة «${esc(RT[id+1].name)}»`:`🏆 إعلان الفائز`;sync()}
+ },700);
+}
+function crown(){
+ const T=[...RT].sort((a,b)=>b.sum-a.sum),tie=T.length>1&&T[1].sum==T[0].sum;
+ CROWN={tie:tie?1:0,rank:T.map(t=>({n:t.name,c:t.c,no:t.no,s:t.sum}))};
+ $("nb").remove();
+ const p=document.createElement("div");p.style.cssText="display:grid;gap:22px";
+ p.innerHTML=winnerHTML(CROWN)+`<button class="btn primary xl full" onclick="newGame()"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg>لعبة جديدة</button>`;
+ $("res").appendChild(p);p.scrollIntoView({behavior:"smooth",block:"start"});
+ confetti(tie?[T[0].c,T[1].c,"#fff"]:[T[0].c,"#ffc940","#fff","#22d3ee"]);
+ sync();
+}
+function winnerHTML(W){
+ const T=W.rank||[],top=Math.max(1,T[0]?T[0].s:1),tie=W.tie;
+ return`<div class="panel panel-raised winner view"><div class="trophy">${tie?"🤝":"🏆"}</div><p class="label">${tie?"النتيجة":"الفائز"}</p><h2>${tie?"تعادل بين المتصدّرين":esc(T[0].n)}</h2>
+  <div class="final">${T.map((t,k)=>`<div class="row ${t.s==T[0].s?"hl":""}" style="--tc:${t.c};animation-delay:${250+k*110}ms"><span class="bar" style="width:${t.s/top*100}%"></span><span class="medal">${["🥇","🥈","🥉"][k]||`<span class="num">${k+1}</span>`}</span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.n)}</span><span class="pt"><span class="num">${t.s}</span><small>ريال</small></span></div>`).join("")}</div></div>`;
+}
+function confetti(cs){
+ if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+ const c=document.createElement("div");c.className="confetti";
+ for(let i=0;i<90;i++){const s=document.createElement("i");s.style.left=Math.random()*100+"%";s.style.background=cs[i%cs.length];
+  s.style.animationDuration=2.4+Math.random()*2.4+"s";s.style.animationDelay=Math.random()*.9+"s";c.appendChild(s)}
+ document.body.appendChild(c);setTimeout(()=>c.remove(),6200);
+}
+
+/* ---------- QR (display) ---------- */
+function hostURL(){return location.origin+location.pathname+"?host="+ROOM}
+function drawQR(el,size){
+ el.innerHTML="";
+ if(typeof QRCode=="undefined"){el.innerHTML=`<p class="hint">تعذّر تحميل مولّد الباركود. افتح هذا الرابط بالجوال:<br><span class="num" style="word-break:break-all">${esc(hostURL())}</span></p>`;return}
+ new QRCode(el,{text:hostURL(),width:size,height:size,colorDark:"#14213d",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+}
+function qrPanel(){
+ const p=$("qrp");
+ if(!NET){
+  p.innerHTML=`<p class="label" style="margin:0">تحكم من الجوال</p><h2>اربط Firebase أولاً</h2>
+   <ol class="steps"><li><b class="num">1</b><span>أنشئ مشروع Firebase وفعّل Realtime Database.</span></li><li><b class="num">2</b><span>الصق إعدادات المشروع في <span class="num">FIREBASE_CONFIG</span> أعلى الكود.</span></li><li><b class="num">3</b><span>ارفع اللعبة على Firebase Hosting وافتحها من الرابط.</span></li></ol>
+   <p class="hint">اللعبة تشتغل الحين عادي من هذه الشاشة بدون جوال.</p>`;return}
+ p.innerHTML=`<p class="label" style="margin:0">تحكم من الجوال</p><h2>صوّر الباركود يا المقدم</h2>
+  <div class="qrbox" id="qr1"></div>
+  <span class="code num">${ROOM}</span>
+  <span class="chip live" id="live1"><span class="ld"></span><span class="lt">بانتظار المقدم</span></span>
+  <ol class="steps"><li><b class="num">1</b><span>افتح الكاميرا وصوّر الباركود.</span></li><li><b class="num">2</b><span>تحكم بالفرق والكروت والنتائج من جوالك.</span></li><li><b class="num">3</b><span>طلع الباركود بالغلط؟ زر الباركود في زاوية الشاشة يرجّعه.</span></li></ol>
+  ${location.protocol=="file:"?`<p class="warn">أنت فاتح الملف من جهازك. الباركود يشتغل بس بعد رفع اللعبة على الاستضافة.</p>`:""}`;
+ drawQR($("qr1"),220);liveUI();
+}
+function openQR(){$("code2").textContent=ROOM;drawQR($("qr2"),300);liveUI();$("qrdlg").showModal()}
+function liveUI(){
+ ["live1","live2"].forEach(id=>{const e=$(id);if(!e)return;e.classList.toggle("ok",HOSTON);e.querySelector(".lt").textContent=HOSTON?"المقدم متصل":"بانتظار المقدم"});
+ $("fab").classList.toggle("ok",HOSTON);
+}
+function getRoom(){
+ let r=null;try{r=sessionStorage.getItem("kmRoom")}catch(e){}
+ if(!r){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789",b=new Uint8Array(8);crypto.getRandomValues(b);r=[...b].map(x=>a[x%a.length]).join("");try{sessionStorage.setItem("kmRoom",r)}catch(e){}}
+ return r;
+}
+
+/* ---------- Phone remote ---------- */
+let LAST=null,PEND=false,CONN=true;
+function send(c){if(NET&&HOSTROOM){NET.sendCmd(HOSTROOM,c);if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){}}}
+function R(s){
+ LAST=s;const box=$("remote"),a=document.activeElement;
+ if(a&&a.tagName=="INPUT"&&box.contains(a)){PEND=true;return}
+ const top=`<div class="rm-top"><span class="chip">${ICON_PHONE}لوحة المقدم</span><span class="chip live ${CONN?"ok":""}"><span class="ld"></span>${CONN?"متصل":"غير متصل"} · <span class="num">${esc(HOSTROOM)}</span></span></div>`;
+ if(!NET){box.innerHTML=top+`<div class="panel panel-raised wait"><h2 style="font-family:var(--disp);margin:0">تعذّر الاتصال</h2><p class="hint">إعدادات Firebase غير موجودة في الصفحة أو الإنترنت مقطوع.</p></div>`;return}
+ if(!s){box.innerHTML=top+`<div class="panel panel-raised wait"><p class="label" style="margin:0">لحظة</p><h2 style="font-family:var(--disp);margin:0">بانتظار شاشة العرض…</h2><div class="shim" style="width:100%"></div><p class="hint">تأكد إن شاشة اللعبة مفتوحة على الجهاز الثاني.</p></div>`;return}
+ const T=s.teams||[];let h=top;
+ if(s.scr=="setup"){
+  h+=`<div class="panel panel-raised" style="display:grid;gap:22px">
+   <div class="grp"><p class="label" style="margin:0">الفرق</p>
+    ${T.map((t,i)=>`<div class="trow" style="--tc:${t.c};animation:none"><span class="av num">${t.no}</span><input class="inp" value="${esc(t.n)}" maxlength="24" aria-label="اسم الفريق ${i+1}" onchange="send({t:'name',i:${i},v:this.value})"><button class="btn ghost icon" aria-label="حذف الفريق" onclick="send({t:'del',i:${i}})">${ICON_X}</button></div>`).join("")}
+    <button class="btn ghost full" ${T.length>=s.max?"disabled":""} onclick="send({t:'add'})">${ICON_PLUS}إضافة فريق</button></div>
+   <div class="grp"><p class="label">حجم اللوحة</p><div class="opts">${SZ.map((z,i)=>`<button class="btn ghost opt" aria-pressed="${i==s.SI}" onclick="send({t:'size',i:${i}})"><b class="num">${z[0]} × ${z[1]}</b><small><span class="num">${z[0]*z[1]}</span> كرت</small></button>`).join("")}</div></div>
+   <div class="grp"><p class="label">أقصى عدد محاولات</p><div class="opts six">${[1,2,3,4,5,6].map(n=>`<button class="btn ghost opt" aria-pressed="${n==s.A}" onclick="send({t:'att',n:${n}})"><b class="num">${n}</b></button>`).join("")}</div></div>
+  </div>
+  <button class="hero" onclick="send({t:'start'})"><span class="play"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span><span><b>ابدأ اللعبة</b><span class="d">الكروت تتوزع على الشاشة</span></span></button>
+  <p class="err">${esc(s.err||"")}</p>`;
+ }else if(s.scr=="game"){
+  const top2=Math.max(1,...T.map(t=>t.p));
+  const C=s.cards||[];
+  h+=`<div class="panel turn">${turnHTML({cur:s.cur,ch:s.ch,left:s.left,tot:s.tot,A:s.A,teams:T},true)}</div>
+   <div class="panel"><p class="label">الكروت · اضغط للكشف</p><div class="mg" style="grid-template-columns:repeat(${s.cols},1fr)">${C.map((d,i)=>`<button class="mc ${d.v?"v":""} ${d.m>=0?"m":""} ${d.r?"r":""}" style="${d.m>=0&&T[d.m]?`--tc:${T[d.m].c}`:""}" aria-label="كرت ${i+1}" onclick="send({t:'flip',i:${i}})">${d.v?`<span class="e">${d.e}</span>`:`<b class="num">${i+1}</b>`}</button>`).join("")}</div></div>
+   <div class="panel"><p class="label">الفرق</p><div class="board-list">${T.map((t,i)=>`<button class="row ${i==s.cur?"hl":""} ${s.cur>=0&&i!=s.cur?"dim":""}" style="--tc:${t.c};animation:none" ${s.cur>=0?"disabled":""} onclick="send({t:'pick',i:${i}})"><span class="bar" style="width:${t.p/top2*100}%"></span><span class="av sm num">${t.no}</span><span class="nm">${esc(t.n)}</span><span class="pt"><span class="num">${t.p}</span><small>زوج</small></span></button>`).join("")}</div></div>
+   <div class="tools">
+    <button class="btn teal lg full ${s.rad?"on":""}" ${s.rs>0?"disabled":""} onclick="send({t:'radar'})">${ICON_RADAR}${s.rs>0?`يُخفى بعد <span class="num">${s.rs}</span>`:s.rad?"اختر كرتاً · إلغاء":"الرادار"}</button>
+    <button class="btn ghost full" onclick="$('dlg').showModal()">${ICON_STOP}إنهاء اللعبة</button>
+   </div>`;
+ }else{
+  const res=s.res||[];
+  h+=`<div class="res-head"><p class="sub on-blue">انتهت اللعبة 🎉</p><h2 class="sticker" style="font-size:2.2rem">لحظة الحساب</h2></div>`;
+  if(s.win&&s.win.rank){h+=winnerHTML(s.win)+`<button class="btn primary xl full" onclick="send({t:'new'})">لعبة جديدة</button>`}
+  else{
+   h+=`<div class="panel"><p class="label">النتائج</p><div class="board-list">${res.length?res.map(t=>`<div class="row" style="--tc:${t.c};animation:none"><span class="av sm num">${t.no}</span><span class="nm">${esc(t.n)}</span><span class="pt">${t.s<0?`<small>جارٍ الحساب…</small>`:`<span class="num">${t.s}</span><small>ريال</small>`}</span></div>`).join(""):`<p class="hint">اضغط الزر لعرض نتيجة أول فريق على الشاشة.</p>`}</div></div>
+    <button class="btn gold xl full" ${s.nb&&s.nb.d?"disabled":""} onclick="send({t:'next'})">${esc(s.nb&&s.nb.l||"عرض النتائج")}</button>`;
+  }
+ }
+ box.innerHTML=h;
+}
+
+/* ---------- Network ---------- */
+async function firebaseNet(cfg){
+ const V="10.12.2";
+ const {initializeApp}=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+ const D=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-database.js`);
+ const db=D.getDatabase(initializeApp(cfg)),r=p=>D.ref(db,p);
+ return{
+  publishState:(room,s)=>D.set(r(`rooms/${room}/state`),s),
+  onState:(room,cb)=>D.onValue(r(`rooms/${room}/state`),sn=>cb(sn.val())),
+  sendCmd:(room,c)=>D.push(r(`rooms/${room}/cmd`),c),
+  onCmd:(room,cb)=>D.onChildAdded(r(`rooms/${room}/cmd`),sn=>{const v=sn.val();D.remove(sn.ref);cb(v)}),
+  presence:room=>{const p=r(`rooms/${room}/host`);D.onValue(r(".info/connected"),s=>{if(s.val()){D.onDisconnect(p).remove();D.set(p,true)}})},
+  onHost:(room,cb)=>D.onValue(r(`rooms/${room}/host`),s=>cb(!!s.val())),
+  onConn:cb=>D.onValue(r(".info/connected"),s=>cb(!!s.val()))
+ };
+}
+async function boot(){
+ try{
+  if(window.__TEST_NET)NET=window.__TEST_NET;
+  else if(FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.databaseURL)NET=await firebaseNet(FIREBASE_CONFIG);
+ }catch(e){console.warn("Firebase",e);NET=null}
+ if(HOSTROOM){
+  if(NET){NET.onConn(ok=>{CONN=ok;R(LAST)});NET.onState(HOSTROOM,R);NET.presence(HOSTROOM)}
+  R(null);return;
+ }
+ if(NET){
+  ROOM=getRoom();
+  NET.onCmd(ROOM,run);
+  NET.onHost(ROOM,ok=>{HOSTON=ok;liveUI();if(ok){sync();if($("qrdlg").open)$("qrdlg").close()}});
+ }
+ qrPanel();show(SCR);
+}
+
+/* ---------- Init ---------- */
+if(HOSTROOM){
+ ["setup","game","end"].forEach(x=>$(x).classList.add("hide"));
+ $("remote").classList.remove("hide");document.body.classList.add("playing");
+ $("remote").addEventListener("focusout",()=>setTimeout(()=>{if(PEND){PEND=false;R(LAST)}},0));
+}
+seg();addT();addT();
+boot();
+</script></body></html>
