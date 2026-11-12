@@ -166,16 +166,16 @@ button.row:disabled{cursor:default}
 .face{position:absolute;inset:0;border-radius:var(--r-sm);border:3px solid var(--ink);box-shadow:var(--shadow-1);display:flex;align-items:center;justify-content:center;
  backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .bk{background:var(--blue-500);background-image:radial-gradient(rgba(255,255,255,.28) 2px,transparent 2px);background-size:14px 14px;transition:transform .12s var(--ease-out),box-shadow .12s,background-color .15s}
-.bk b{font-family:var(--disp);font-weight:800;font-size:clamp(.9rem,36cqi,2.4rem);line-height:1}
+.bk b{font-family:var(--disp);font-weight:800;font-size:clamp(.9rem,36cqi,4.2rem);line-height:1}
 .c:not(.o):not(:disabled):hover .bk{background-color:var(--blue-400)}
 .c:not(.o):not(:disabled):active .bk{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
 .ft{transform:rotateY(180deg);flex-direction:column;gap:4cqi;background:#fff}
 .em{font-size:44cqi;line-height:1}
-.price{font-size:clamp(.5rem,12.5cqi,.95rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
+.price{font-size:clamp(.5rem,13cqi,1.9rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
 .c.m .ft{background:color-mix(in srgb,var(--tc) 30%,#fff)}
 .c.m .price{background:#fff}
-.c.m .tag{position:absolute;top:-8px;inset-inline-end:-8px;width:clamp(18px,30cqi,30px);height:clamp(18px,30cqi,30px);border-radius:30%;background:var(--tc);border:2.5px solid var(--ink);
- display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(.6rem,16cqi,.95rem);box-shadow:2px 2px 0 var(--ink)}
+.c.m .tag{position:absolute;top:-8px;inset-inline-end:-8px;width:clamp(18px,24cqi,46px);height:clamp(18px,24cqi,46px);border-radius:30%;background:var(--tc);border:2.5px solid var(--ink);
+ display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(.6rem,13cqi,1.5rem);box-shadow:2px 2px 0 var(--ink)}
 .c.m{animation:pop .55s var(--spring);cursor:default}
 .c.no .in{animation:shake .45s ease}
 .c.rd .ft{background:#e0fbff;box-shadow:0 0 0 3px var(--cyan),var(--shadow-1)}
@@ -246,7 +246,7 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
 .warn{font-size:.82rem;color:var(--ink);background:var(--gold-300);border:2px solid var(--ink);border-radius:var(--r-sm);padding:8px 10px;margin:0}
 
 /* ===== Corner QR button ===== */
-.fab{position:fixed;z-index:30;top:max(14px,env(safe-area-inset-top));inset-inline-end:14px;width:56px;height:56px;border-radius:999px;padding:0;
+.fab{position:relative;width:56px;height:56px;border-radius:999px;padding:0;
  box-shadow:var(--shadow-2)}
 .fab:active:not(:disabled){transform:translate(5px,5px)}
 .fab .dotx{position:absolute;top:-4px;inset-inline-start:-4px;width:18px;height:18px;border-radius:50%;border:3px solid var(--ink);background:var(--text-low)}
@@ -270,6 +270,29 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
 .rm .who{font-size:1.7rem}
 .wait{text-align:center;display:grid;gap:12px;justify-items:center}
 
+/* ===== Projector layout ===== */
+.fabs{position:fixed;z-index:30;top:max(14px,env(safe-area-inset-top));inset-inline-end:14px;display:flex;flex-direction:column;gap:14px}
+.side-head{display:none}
+.side-head .btn.icon{width:44px;height:44px}
+@media (min-width:1000px){
+ body.playing{padding:16px}
+ body.playing .w{max-width:none}
+ body.playing header,body.playing .fabs{display:none}
+ .game{grid-template-columns:260px 1fr;gap:20px}
+ .side{gap:14px}
+ .side-head{display:flex;align-items:center;gap:8px}
+ .side-head .logo{width:44px;height:44px;border-width:3px;box-shadow:var(--shadow-1);animation:none}
+ .side-head .logo svg{width:30px;height:30px}
+ .side-head h2{flex:1;min-width:0;font-family:var(--disp);font-weight:800;font-size:1.15rem;margin:0;line-height:1.1;white-space:nowrap}
+ .side .panel{padding:14px}
+ .side .turn .who{font-size:1.45rem}
+ .side .turn .picks .btn{width:48px;height:48px}
+ .side .pip{width:18px;height:18px}
+ .side .label{margin-bottom:8px}
+ .side .row{padding:7px 10px;gap:8px}
+ .side .tools .btn.lg{height:50px;font-size:16px}
+ .stage{justify-self:center;padding:14px}
+}
 @media (max-width:560px){.panel{padding:18px}.opts.six{grid-template-columns:repeat(3,1fr)}.hero b{font-size:1.5rem}.hero .play{width:54px;height:54px}}
 </style></head><body>
 <div class="w">
@@ -315,6 +338,12 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
 <!-- ================= GAME ================= -->
 <section id="game" class="game hide" aria-label="اللعبة">
  <aside class="side">
+  <div class="side-head">
+   <div class="logo" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="12" width="20" height="26" rx="5" fill="#ff5a5f" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="14" fill="#ffc940" stroke="#14213d" stroke-width="4"/><circle cx="36" cy="30" r="6" fill="#fff" stroke="#14213d" stroke-width="3"/><path d="M46 40l10 10" stroke="#14213d" stroke-width="6" stroke-linecap="round"/></svg></div>
+   <h2 class="sticker">اكشف المستور</h2>
+   <button class="btn gold icon hide" id="sqr" aria-label="عرض باركود المقدم" onclick="openQR()"><svg class="i s" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18z"/></svg></button>
+   <button class="btn ghost icon" id="sfs" aria-label="ملء الشاشة" onclick="fs()"></button>
+  </div>
   <div class="panel turn" id="info" aria-live="polite"></div>
   <div class="panel">
    <p class="label">لوحة الفرق</p>
@@ -325,7 +354,7 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
    <button class="btn ghost full" onclick="$('dlg').showModal()"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>إنهاء اللعبة</button>
   </div>
  </aside>
- <div class="panel panel-raised stage"><div class="grid" id="grid"></div></div>
+ <div class="panel panel-raised stage" id="stage"><div class="grid" id="grid"></div></div>
 </section>
 
 <!-- ================= END ================= -->
@@ -336,8 +365,11 @@ dialog p{color:var(--text-mid);margin:0 0 20px}
 </main>
 </div>
 
+<div class="fabs" id="fabs">
+<button class="btn ghost fab" id="fsb" aria-label="ملء الشاشة" onclick="fs()"></button>
 <button class="btn gold fab hide" id="fab" aria-label="عرض باركود المقدم" onclick="openQR()"><span class="dotx"></span>
  <svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 19.5h1M20.5 14v1.5"/></svg></button>
+</div>
 
 <dialog id="qrdlg">
  <h2>تحكم من الجوال</h2>
@@ -449,14 +481,15 @@ function start(){
  deck=[...pick,...pick].sort(()=>Math.random()-.5).map(x=>({e:x[0],n:x[1],p:x[2],m:-1,o:false}));
  teams=teams.map((t,i)=>({name:(t||"").trim()||"فريق "+(i+1),cards:[],c:col(i),no:i+1}));
  cur=-1;ch=false;fl=[];lock=false;rad=false;COLS=c;radT=[];radSec=0;CROWN=null;radarIdle();
- const g=$("grid");g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.maxWidth=`min(100%,${c<=5?640:9999}px,calc((100dvh - 150px) * ${c/r}))`;
+ const g=$("grid");g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.gap="10px";
+ $("stage").style.width=`min(100%,calc((100dvh - 68px - ${(r-1)*10}px) * ${c/r} + ${(c-1)*10+36}px))`;
  g.innerHTML=deck.map((d,i)=>`<button class="c" id="k${i}" style="--i:${i}" aria-label="كرت ${i+1}" onclick="flip(${i})"><span class="in"><span class="face bk"><b class="sticker num">${i+1}</b></span><span class="face ft"><span class="em">${d.e}</span><span class="price"><span class="num">${d.p}</span> ريال</span></span></span></button>`).join("");
  show("game");draw();
 }
 function show(id){
  SCR=id;document.body.classList.toggle("playing",id=="game");
  ["setup","game","end"].forEach(x=>{$(x).classList.toggle("hide",x!=id);$(x).classList.toggle("view",x==id)});
- $("fab").classList.toggle("hide",!NET||!ROOM||id=="setup");
+ $("fab").classList.toggle("hide",!NET||!ROOM||id=="setup");$("sqr").classList.toggle("hide",!NET||!ROOM);
  window.scrollTo({top:0});sync();
 }
 function newGame(){CROWN=null;teams=teams.map(t=>t.name);show("setup");tl()}
@@ -567,6 +600,17 @@ function confetti(cs){
  document.body.appendChild(c);setTimeout(()=>c.remove(),6200);
 }
 
+/* ---------- Fullscreen ---------- */
+const ICON_FS=`<svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>`;
+const ICON_FSX=`<svg class="i" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>`;
+function fs(){const d=document,e=d.documentElement;
+ try{if(!(d.fullscreenElement||d.webkitFullscreenElement))(e.requestFullscreen||e.webkitRequestFullscreen).call(e);else(d.exitFullscreen||d.webkitExitFullscreen).call(d)}catch(x){}}
+function fsUI(){const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+ ["fsb","sfs"].forEach(id=>{const b=$(id);b.innerHTML=on?ICON_FSX:ICON_FS;b.setAttribute("aria-label",on?"الخروج من ملء الشاشة":"ملء الشاشة");b.title=on?"الخروج من ملء الشاشة (F)":"ملء الشاشة (F)"})}
+document.addEventListener("fullscreenchange",fsUI);document.addEventListener("webkitfullscreenchange",fsUI);
+document.addEventListener("keydown",e=>{if(HOSTROOM||e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target.tagName;if(t=="INPUT"||t=="TEXTAREA")return;if(e.key=="f"||e.key=="F"||e.key=="ب"){e.preventDefault();fs()}});
+fsUI();
+
 /* ---------- QR (display) ---------- */
 function hostURL(){return location.origin+location.pathname+"?host="+ROOM}
 function drawQR(el,size){
@@ -591,7 +635,7 @@ function qrPanel(){
 function openQR(){$("code2").textContent=ROOM;drawQR($("qr2"),300);liveUI();$("qrdlg").showModal()}
 function liveUI(){
  ["live1","live2"].forEach(id=>{const e=$(id);if(!e)return;e.classList.toggle("ok",HOSTON);e.querySelector(".lt").textContent=HOSTON?"المقدم متصل":"بانتظار المقدم"});
- $("fab").classList.toggle("ok",HOSTON);
+ $("fab").classList.toggle("ok",HOSTON);$("sqr").classList.toggle("ok",HOSTON);
 }
 function getRoom(){
  let r=null;try{r=sessionStorage.getItem("kmRoom")}catch(e){}
@@ -677,7 +721,7 @@ async function boot(){
 /* ---------- Init ---------- */
 if(HOSTROOM){
  ["setup","game","end"].forEach(x=>$(x).classList.add("hide"));
- $("remote").classList.remove("hide");document.body.classList.add("playing");
+ $("remote").classList.remove("hide");document.body.classList.add("playing");$("fabs").classList.add("hide");
  $("remote").addEventListener("focusout",()=>setTimeout(()=>{if(PEND){PEND=false;R(LAST)}},0));
 }
 seg();addT();addT();
