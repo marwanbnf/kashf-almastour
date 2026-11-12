@@ -172,8 +172,9 @@ button.row:disabled{cursor:default}
 .ft{transform:rotateY(180deg);flex-direction:column;gap:4cqmin;background:#fff}
 .em{font-size:52cqmin;line-height:1}
 @container (min-aspect-ratio:13/10){
- .em{font-size:min(64cqh,46cqw);margin-top:-14cqh}
- .price{position:absolute;bottom:7cqh;font-size:clamp(.6rem,min(13cqh,8cqw),2rem)!important}
+ .ft{flex-direction:row;gap:4cqw}
+ .em{font-size:min(64cqh,38cqw)}
+ .price{font-size:clamp(.6rem,min(13cqh,6.6cqw),2rem)!important}
 }
 .price{font-size:clamp(.5rem,13cqmin,2rem);font-weight:900;background:var(--gold-400);border:2px solid var(--ink);border-radius:999px;padding:.1em .6em;white-space:nowrap}
 .c.m .ft{background:color-mix(in srgb,var(--tc) 30%,#fff)}
